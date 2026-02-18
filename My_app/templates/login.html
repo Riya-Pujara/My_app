@@ -1,0 +1,108 @@
+{% extends 'base.html' %} {% load static %} {% block navbar %}{% endblock %}
+{%block footer %}{% endblock %} {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}" />
+{% endblock %}
+<style>
+  /* Inline style for the error messages */
+  .alert-error {
+    background-color: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    list-style: none;
+  }
+</style>
+{% block content %}
+<div class="login-wrapper">
+  <a href="{% url 'homepage' %}" class="btn-back">
+    <i class="fas fa-chevron-left"></i> Return to Job Portal
+  </a>
+
+  <div class="login-card-large">
+    <div class="login-header-large">
+      <a href="{% url 'homepage' %}" class="logo-large"
+        >Career<span>Connect</span></a
+      >
+      <h1>Welcome Back</h1>
+      <p>Login to access your personalized job matches and applications.</p>
+    </div>
+
+    {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+      <li class="alert-error">{{ message }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    <form class="login-form-large" method="POST" action="{% url 'login' %}">
+      {% csrf_token %}
+
+      <div class="form-group-large">
+        <label>Professional Email</label>
+        <div class="input-icon-wrapper">
+          <i class="fas fa-envelope"></i>
+          <input
+            type="email"
+            name="username"
+            placeholder="e.g. alex.professional@gmail.com"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="form-group-large">
+        <div
+          class="label-flex"
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+          "
+        >
+          <label style="margin-bottom: 0">Password</label>
+          <a
+            href="#"
+            class="link-cyan"
+            style="
+              font-size: 0.85rem;
+              text-decoration: none;
+              color: var(--cyan);
+              font-weight: 700;
+            "
+            >Forgot Password?</a
+          >
+        </div>
+        <div class="input-icon-wrapper">
+          <i class="fas fa-lock"></i>
+          <input type="password" name="password" placeholder="*****" required />
+        </div>
+      </div>
+
+      <button type="submit" class="btn-login-massive">
+        Sign In to Account
+      </button>
+
+      <div
+        class="login-footer-large"
+        style="text-align: center; margin-top: 30px"
+      >
+        <p>
+          Not a member yet?
+          <a
+            href="{% url 'registration' %}"
+            style="color: var(--cyan); text-decoration: none; font-weight: 700"
+            >Create an account</a
+          >
+        </p>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

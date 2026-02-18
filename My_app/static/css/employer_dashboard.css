@@ -1,0 +1,164 @@
+/* Sidebar and Layout logic similar to Seeker Dashboard */
+.main-content {
+  margin-left: 280px;
+  padding: 40px;
+  background: #f4f7fe;
+  min-height: 100vh;
+}
+
+/* Banner Box */
+.banner-box {
+  background: var(--navy);
+  padding: 40px;
+  border-radius: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  margin-bottom: 40px;
+  box-shadow: 0 15px 30px var(--cyan-glow);
+}
+.btn-cyan-action {
+  background: var(--cyan);
+  color: var(--navy);
+  padding: 15px 30px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+/* Table Styles */
+.table-container {
+  background: white;
+  padding: 30px;
+  border-radius: 25px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+}
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 25px;
+}
+.applicant-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.applicant-table th {
+  text-align: left;
+  padding: 15px;
+  color: var(--text-light);
+  border-bottom: 1px solid #eee;
+}
+.applicant-table td {
+  padding: 20px 15px;
+  border-bottom: 1px solid #f8fafc;
+}
+
+.candidate-cell {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.avatar-sm {
+  width: 40px;
+  height: 40px;
+  background: #e2e8f0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.score-badge {
+  background: #ecfdf5;
+  color: #059669;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+.status-badge {
+  background: #fff7ed;
+  color: #ea580c;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Action Buttons */
+.btn-group {
+  display: flex;
+  gap: 10px;
+}
+.action-btn {
+  width: 35px;
+  height: 35px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.action-btn.check {
+  background: #dcfce7;
+  color: #16a34a;
+}
+.action-btn.cross {
+  background: #fee2e2;
+  color: #dc2626;
+}
+.action-btn.mail {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 25, 47, 0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.modal-box {
+  background: white;
+  padding: 40px;
+  border-radius: 30px;
+  width: 500px;
+  text-align: center;
+}
+.modal-box textarea {
+  width: 100%;
+  height: 120px;
+  margin: 20px 0;
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  resize: none;
+}
+.modal-footer {
+  display: flex;
+  gap: 15px;
+}
+.btn-cancel {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.btn-confirm {
+  flex: 2;
+  padding: 12px;
+  background: var(--navy);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
