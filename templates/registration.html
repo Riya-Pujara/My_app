@@ -1,0 +1,192 @@
+{% extends 'base.html' %} {% load static %} {% block navbar %}{% endblock %}
+{%block footer %}{% endblock %} {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/registration.css' %}" />
+{% endblock %} {% block content %}
+<div class="register-container">
+  <div class="register-card" id="registerCard">
+    <div class="header-section" id="headerSection">
+      <a href="{% url 'homepage' %}" class="logo-large"
+        >Career<span>Connect</span></a
+      >
+      <h1 id="mainTitle">Create Your Account</h1>
+      <p id="mainSub">Select your role to get started with our platform.</p>
+    </div>
+
+    <form id="detailsForm" method="POST" action="{% url 'registration' %}">
+      {% csrf_token %}
+
+      <input type="hidden" name="role" id="selectedRoleInput" value="" />
+
+      <div id="step1" class="form-step active">
+        <div class="role-grid">
+          <div class="role-box" onclick="setRole('Seeker', this)">
+            <div class="role-icon"><i class="fas fa-user-tie"></i></div>
+            <h3>Job Seeker</h3>
+            <p>Find jobs & manage applications</p>
+          </div>
+          <div class="role-box" onclick="setRole('Employer', this)">
+            <div class="role-icon"><i class="fas fa-building"></i></div>
+            <h3>Employer</h3>
+            <p>Post jobs & hire top talent</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="btn-primary-large"
+          id="nextBtn"
+          disabled
+          onclick="nextStep()"
+        >
+          Continue to Details
+        </button>
+      </div>
+
+      <div id="step2" class="form-step">
+        <div class="form-row">
+          <div class="input-group">
+            <label>Full Name</label>
+            <input
+              type="text"
+              name="full_name"
+              placeholder="Enter full name"
+              required
+            />
+          </div>
+          <div class="input-group">
+            <label>Email Address</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="email@example.com"
+              required
+            />
+          </div>
+        </div>
+
+        <div id="seekerFields" class="role-fields">
+          <div class="form-row">
+            <div class="input-group">
+              <label>Years of Experience</label>
+              <input type="number" name="experience" placeholder="e.g. 5" />
+            </div>
+            <div class="input-group">
+              <label>Work Type</label>
+              <select name="work_type">
+                <option value="remote">Remote</option>
+                <option value="onsite">On-site</option>
+                <option value="hybrid">Hybrid</option>
+              </select>
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Primary Skills</label>
+            <input
+              type="text"
+              name="skills"
+              placeholder="e.g. React, Python, SQL"
+            />
+          </div>
+        </div>
+
+        <div id="employerFields" class="role-fields">
+          <div class="form-row">
+            <div class="input-group">
+              <label>Company Name</label>
+              <input
+                type="text"
+                name="company_name"
+                placeholder="e.g. TechCorp Solutions"
+              />
+            </div>
+            <div class="input-group">
+              <label>Company ID / Reg No.</label>
+              <input type="text" name="company_id" placeholder="ID-998877" />
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Industry Type</label>
+            <select name="industry">
+              <option value="it">Information Technology</option>
+              <option value="finance">Finance & Banking</option>
+              <option value="healthcare">Healthcare</option>
+              <option value="marketing">Marketing</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="input-group">
+            <label>Password</label>
+            <input
+              type="password"
+              name="password"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+          <div class="input-group">
+            <label>Confirm Password</label>
+            <input
+              type="password"
+              name="password_confirm"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary-large">
+          Complete Registration
+        </button>
+        <button type="button" class="btn-link" onclick="prevStep()">
+          Back to Role Selection
+        </button>
+      </div>
+    </form>
+
+    <div id="successOverlay" class="success-screen">
+      <div class="success-content">
+        <div class="check-box"><i class="fas fa-check"></i></div>
+        <h2>Account Created!</h2>
+        <p>Your registration was successful. You will now be redirected.</p>
+        <a href="{% url 'login' %}" class="btn-navy-large">Proceed to Login</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  let selectedRole = "";
+
+  function setRole(role, element) {
+    selectedRole = role;
+
+    document.getElementById("selectedRoleInput").value = role;
+
+    document.querySelectorAll(".role-box").forEach((b) => b.classList.remove("selected"));
+    element.classList.add("selected");
+    document.getElementById("nextBtn").disabled = false;
+  }
+
+  function nextStep() {
+    document.getElementById("step1").classList.remove("active");
+    document.getElementById("step2").classList.add("active");
+    document.getElementById("mainTitle").innerText = "Register as " + selectedRole;
+    document.getElementById("mainSub").innerText = "Please provide your " + selectedRole.toLowerCase() + " details.";
+
+    document.querySelectorAll(".role-fields").forEach((f) => (f.style.display = "none"));
+    if (selectedRole === "Seeker") document.getElementById("seekerFields").style.display = "block";
+    if (selectedRole === "Employer") document.getElementById("employerFields").style.display = "block";
+  }
+
+  function prevStep() {
+    document.getElementById("step2").classList.remove("active");
+    document.getElementById("step1").classList.add("active");
+    document.getElementById("mainTitle").innerText = "Create Your Account";
+  }
+
+  {% if registration_success %}
+    document.getElementById("successOverlay").classList.add("active");
+  {% endif %}
+</script>
+{% endblock %}
