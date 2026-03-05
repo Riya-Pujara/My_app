@@ -15,20 +15,16 @@
           </a>
         </li>
         <li>
-          <a href="#"><i class="fas fa-search"></i> Browse Jobs</a>
+          <a href="{% url 'view_all_jobs' %}"><i class="fas fa-search"></i> Browse Jobs</a>
+        </li>
+      
+        <li>
+          <li><a href="{% url 'manage_resume' %}">Resume / CV</a></li>
         </li>
         <li>
-          <a href="#"><i class="fas fa-paper-plane"></i> My Applications</a>
+          <a href="{% url 'my_profile' %}"><i class="fas fa-user-circle"></i> My Profile</a>
         </li>
-        <li>
-          <a href="#"><i class="fas fa-file-invoice"></i> Resume / CV</a>
-        </li>
-        <li>
-          <a href="#"><i class="fas fa-user-circle"></i> My Profile</a>
-        </li>
-        <li>
-          <a href="#"><i class="fas fa-cog"></i> Settings</a>
-        </li>
+        
       </ul>
     </nav>
     <div class="sidebar-footer">
@@ -61,26 +57,6 @@
         </div>
       </div>
     </header>
-
-    <section class="stats-grid">
-      <div class="stat-card">
-        <h3>Applied Jobs</h3>
-        <p class="stat-number">{{ stats.applied_count|default:"0" }}</p>
-        <span class="stat-change"
-          >+{{ stats.weekly_applied|default:"0" }} this week</span
-        >
-      </div>
-      <div class="stat-card">
-        <h3>Interviews</h3>
-        <p class="stat-number">{{ stats.interview_count|default:"0" }}</p>
-        <span class="stat-change">Upcoming</span>
-      </div>
-      <div class="stat-card glow-border">
-        <h3>Profile Views</h3>
-        <p class="stat-number">{{ stats.view_count|default:"0" }}</p>
-        <span class="stat-change text-cyan">Top 10% Seekers</span>
-      </div>
-    </section>
 
     <div class="dashboard-grid">
       <section class="content-box resume-box">
@@ -131,29 +107,21 @@
       <section class="content-box">
         <div class="box-header">
           <h2>Jobs For You</h2>
-          <a href="#" class="link-cyan">View All</a>
+          <a href="{% url 'view_all_jobs' %}" class="link-cyan">View All</a>
         </div>
         <div class="job-list">
           {% for job in recommended_jobs %}
           <div class="job-item">
             <div class="job-main">
-              <div class="comp-logo-small">
-                <i class="fab fa-{{ job.company_icon_slug }}"></i>
-              </div>
               <div>
-                <h4>{{ job.title }}</h4>
+                <h4>{{ job.job_role }}</h4>
                 <p>{{ job.company_name }} • {{ job.location }}</p>
               </div>
             </div>
             <div class="job-meta">
               <span class="salary">{{ job.salary_range }}</span>
-              <a
-                href="{% url 'company_detail' job.id %}"
-                class="btn-navy-sm"
-                style="text-decoration: none"
-                >Apply Now</a
-              >
-            </div>
+        <a href="https://mail.google.com/mail/?view=cm&fs=1&to={{ job.email }}&su=Application for {{ job.job_role }}&body=Hello {{ job.company_name }}, I would like to apply for the {{ job.job_role }} position."
+        target="_blank" class="btn-navy-sm" style="text-decoration: none"> Apply Now</a>            </div>
           </div>
           {% empty %}
           <p>No job recommendations found based on your profile.</p>

@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from .models import User, seekerdb, employerdb, Job, Application, Notification
 from django.contrib import messages
+from .forms import ResumeForm
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -131,6 +132,25 @@ def update_resume(request):
         profile.save()
     return redirect('job_seeker_dashboard')
 
+
+@login_required
+def manage_resume(request):
+    """Form-based resume upload/edit page"""
+    if not request.user.is_seeker:
+        return redirect('homepage')
+
+    profile = request.user.seeker_profile
+
+    if request.method == 'POST':
+        form = ResumeForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('job_seeker_dashboard')
+    else:
+        form = ResumeForm(instance=profile)
+
+    return render(request, 'manage_resume.html', {'form': form})
+
 # --- 4. EMPLOYER VIEWS ---
 
 @login_required
@@ -155,6 +175,16 @@ def employer_dashboard(request):
         'active_jobs_list': my_jobs
     }
     return render(request, 'employer_dashboard.html', context)
+
+
+@login_required
+def my_profile(request):
+    if not request.user.is_seeker:
+        return redirect('homepage')
+
+    profile = request.user.seeker_profile
+
+    return render(request, 'my_profile.html', {'profile': profile})
 
 @user_passes_test(lambda u: u.is_superuser)
 @login_required
@@ -296,7 +326,7 @@ def post_job(request):
 
     if request.method == "POST":
         Job.objects.create(
-            employer=employer,   
+            employer=employer,
             company_name=request.POST.get("company_name"),
             location=request.POST.get("location"),
             contact=request.POST.get("contact"),
@@ -309,4 +339,10 @@ def post_job(request):
         return redirect('employer_dashboard')
 
     return render(request, "post_job.html")
+
+
+@login_required
+def view_all_jobs(request):
+    jobs = Job.objects.filter(is_active=True).order_by('-created_at')
+    return render(request, 'view_all_jobs.html', {'jobs': jobs})
 
