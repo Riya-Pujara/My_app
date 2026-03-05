@@ -9,24 +9,29 @@ from .models import User, seekerdb, employerdb, Job, Application, Notification
 from django.contrib import messages
 from .forms import ResumeForm
 
+@login_required
+def suspend_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+
+    user.is_active = False
+    user.save()
+
+    return redirect('admin_dashboard')
+    
 def login_view(request):
-    if request.user.is_authenticated:
-        return redirect('homepage')
+    if request.method == "POST":
+        username = request.POST["username"]
+        password = request.POST["password"]
 
-    if request.method == 'POST':
-        email = request.POST.get('username')
-        password = request.POST.get('password')
-
-        user = authenticate(request, username=email, password=password)
+        user = authenticate(request, username=username, password=password)
 
         if user is not None:
             login(request, user)
-            return redirect('homepage')   # changed
+            return redirect("homepage")
         else:
-            messages.error(request, "Invalid email or password.")
-            return render(request, 'login.html')
+            return render(request, "login.html", {"error": "Invalid email or password"})
 
-    return render(request, 'login.html')
+    return render(request, "login.html")
 
 def home(request):
     """Home page showing featured companies and search"""
@@ -189,33 +194,22 @@ def my_profile(request):
 @user_passes_test(lambda u: u.is_superuser)
 @login_required
 def admin_dashboard(request):
-    """Dashboard logic for Platform Administrators"""
-    search = request.GET.get('search')
-    users = User.objects.all()
-    # Filtering logic
-    profiles = []
-    all_users = User.objects.exclude(is_superuser=True)
-    
-    if request.GET.get('search'):
-        all_users = all_users.filter(Q(username__icontains=request.GET.get('search')) | Q(email__icontains=request.GET.get('search')))
 
-    for u in all_users:
-        profiles.append({
-            'user': u,
-            'role': 'Seeker' if u.is_seeker else 'Employer'
-        })
+    profiles = seekerdb.objects.all()
 
     stats = {
-        'total_users': all_users.count(),
-        'seekers_count': User.objects.filter(is_seeker=True).count(),
-        'employers_count': User.objects.filter(is_employer=True).count(),
-        'active_jobs': Job.objects.filter(is_active=True).count(),
-        'jobs_today': Job.objects.filter(created_at__date=datetime.today()).count(),
-        'pending_verifications':employerdb.objects.filter(is_verified=False).count()
+        "total_users": profiles.count(),
+        "seekers_count": seekerdb.objects.count(),
+        "employers_count": employerdb.objects.count(),
+        "active_jobs": 0,
+        "jobs_today": 0,
+        "pending_verifications": 0
     }
 
-    return render(request, 'admin_dashboard.html', {'profiles': profiles, 'stats': stats})
-
+    return render(request, "admin_dashboard.html", {
+        "profiles": profiles,
+        "stats": stats
+    })
 # --- 6. MISC ACTIONS ---
 
 def logout_view(request):
