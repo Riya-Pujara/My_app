@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import FileExtensionValidator
+from django.contrib.auth.models import User
 
 class User(AbstractUser):
     is_seeker = models.BooleanField(default=False)
@@ -57,24 +58,23 @@ class employerdb(models.Model):
         return self.company_name
 
 class Job(models.Model):
-    EXP_LEVELS = (
-        ('Fresher', 'Fresher (0-1 Year)'),
-        ('Junior', 'Junior (1-3 Years)'),
-        ('Mid', 'Mid-Level (3-5 Years)'),
-        ('Senior', 'Senior (5+ Years)'),
+    employer = models.ForeignKey(
+        employerdb,
+        on_delete=models.CASCADE,
+        related_name="jobs"
     )
 
-    employer = models.ForeignKey(employerdb, on_delete=models.CASCADE, related_name='jobs')
-    title = models.CharField(max_length=255)
-    description = models.TextField()
-    category = models.CharField(max_length=100) # e.g., 'IT & Tech'
-    location = models.CharField(max_length=255)
-    experience_level = models.CharField(max_length=20, choices=EXP_LEVELS)
+    company_name = models.CharField(max_length=200)
+    location = models.CharField(max_length=200)
+    contact = models.CharField(max_length=15)
+    email = models.EmailField()
+    job_role = models.CharField(max_length=200)
+    experience = models.CharField(max_length=100)
+    skills = models.TextField()
+
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.title} at {self.employer.company_name}"
 
 class Application(models.Model):
     STATUS_CHOICES = (
@@ -104,3 +104,11 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.recipient.username}"
+    
+    
+class JobSeeker(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    resume = models.FileField(upload_to='resumes/', null=True, blank=True)
+
+    def __str__(self):
+        return self.user.email

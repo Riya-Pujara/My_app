@@ -1,0 +1,88 @@
+{% extends 'base.html' %} {% load static %} {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/post_job.css' %}" />
+{% endblock %} {% block content %}
+
+<section class="job-form-section">
+  <div class="container">
+    <div class="section-title">
+      <h2>Post a <span class="cyan-gradient">New Job</span></h2>
+      <div class="title-line"></div>
+    </div>
+
+    <div class="job-form-card">
+      <form method="POST">
+        {% csrf_token %}
+
+        <div class="form-grid">
+          <div class="input-group">
+            <input
+              type="text"
+              name="company_name"
+              placeholder="Company Name"
+              required
+            />
+          </div>
+
+          <div class="input-group">
+            <input
+              type="text"
+              name="location"
+              placeholder="Location"
+              required
+            />
+          </div>
+
+          <div class="input-group">
+            <input
+              type="tel"
+              name="contact"
+              placeholder="Contact Number"
+              required
+            />
+          </div>
+
+          <div class="input-group">
+            <input
+              type="email"
+              name="email"
+              placeholder="Email Address"
+              required
+            />
+          </div>
+
+          <div class="input-group">
+            <input
+              type="text"
+              name="job_role"
+              placeholder="Job Role"
+              required
+            />
+          </div>
+
+          <div class="input-group">
+            <input
+              type="number"
+              name="experience"
+              placeholder="Experience Required (Years)"
+              min="0"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="textarea-group">
+          <textarea
+            name="skills"
+            rows="4"
+            placeholder="Skills Required"
+            required
+          ></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">Submit Job</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
