@@ -5,13 +5,12 @@ from django.core.validators import FileExtensionValidator
 class User(AbstractUser):
     is_seeker = models.BooleanField(default=False)
     is_employer = models.BooleanField(default=False)
-    
+
     profile_picture = models.ImageField(upload_to='profiles/', null=True, blank=True)
 
     def __str__(self):
         return self.username
-
-
+        
 class seekerdb(models.Model):
     WORK_TYPES = (
         ('Remote', 'Remote'),
