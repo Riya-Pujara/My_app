@@ -27,9 +27,7 @@ urlpatterns = [
     
     # path('dashboard/', views.dashboard_redirect, name='dashboard_redirect'),
 
-    path('logout/',views.logout_view,name='logout'),
-    
-    path('send_notification/',views.send_notification,name='send_notification'),
+    path('logout/', views.logout_view, name='logout'),
     
     path('job_search/',views.job_search,name='job_search'),
     
@@ -39,9 +37,10 @@ urlpatterns = [
     
     path('registration/',views.registration,name='registration'),
     
-    path('job_seeker_dashboard/',views.job_seeker_dashboard,name='job_seeker_dashboard'),
-    
-    path('employer_dashboard/',views.employer_dashboard,name='employer_dashboard'),
+    path('job_seeker_dashboard/', views.job_seeker_dashboard, name='job_seeker_dashboard'),
+    path('employer_dashboard/', views.employer_dashboard, name='employer_dashboard'),
+    path('applications/<int:applicant_id>/shortlist/', views.shortlist_candidate, name='shortlist_candidate'),
+    path('applications/<int:applicant_id>/reject/', views.reject_candidate, name='reject_candidate'),
     
     path("post_job/", views.post_job, name="post_job"),
     

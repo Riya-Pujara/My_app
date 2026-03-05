@@ -92,7 +92,7 @@ class Application(models.Model):
         unique_together = ('job', 'seeker') 
 
     def __str__(self):
-        return f"{self.seeker.full_name} -> {self.job.title}"
+        return f"{self.seeker.full_name} -> {self.job.job_role}"
 
 class Notification(models.Model):
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')

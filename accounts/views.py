@@ -3,7 +3,9 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
 from datetime import datetime, timedelta
-from .models import User, seekerdb,employerdb, Job, Application, Notification
+from django.conf import settings
+from django.core.mail import send_mail
+from .models import User, seekerdb, employerdb, Job, Application, Notification
 from django.contrib import messages
 
 def login_view(request):
@@ -133,7 +135,6 @@ def update_resume(request):
 
 @login_required
 def employer_dashboard(request):
-    
     if not request.user.is_employer:
         return redirect('homepage')
 
@@ -141,15 +142,15 @@ def employer_dashboard(request):
     my_jobs = Job.objects.filter(employer=employer)
     applicants = Application.objects.filter(job__employer=employer).order_by('-applied_at')
     
-    stats = {
-        'active_jobs': my_jobs.filter(is_active=True).count(),
-        'total_applicants': applicants.count(),
-        'new_today': applicants.filter(applied_at__date=datetime.today()).count(),
-        'shortlisted': applicants.filter(status='Shortlisted').count()
-    }
-
     context = {
-        'stats': stats,
+        'stats': {
+            'active_jobs': my_jobs.filter(is_active=True).count(),
+            'total_applicants': applicants.count(),
+            'new_today': applicants.filter(applied_at__date=datetime.today()).count(),
+            'shortlisted': applicants.filter(status='Shortlisted').count(),
+        },
+        'pending_count': applicants.filter(status='Pending').count(),
+        'shortlisted_count': applicants.filter(status='Shortlisted').count(),
         'applicants': applicants,
         'active_jobs_list': my_jobs
     }
@@ -199,57 +200,91 @@ def job_search(request):
 
 @login_required
 def shortlist_candidate(request, applicant_id):
-    if request.method == "POST":
-        # 1. Fetch the application
-        application = get_object_or_404(Application, id=applicant_id)
-        
-        # 2. Security Check: Ensure the logged-in user is the owner of the job
-        if application.job.employer != request.user:
-            messages.error(request, "Unauthorized access.")
-            return redirect('employer_dashboard')
+    if request.method != "POST":
+        return redirect('employer_dashboard')
 
-        # 3. Update Status
-        application.status = 'shortlisted' # Ensure 'shortlisted' is in your Model choices
-        application.save()
-        
-        messages.success(request, f"{application.user.get_full_name()} has been shortlisted!")
-    
+    application = get_object_or_404(Application, id=applicant_id)
+
+    # Ensure the logged-in employer owns this job
+    if not request.user.is_employer or application.job.employer.user != request.user:
+        messages.error(request, "Unauthorized access.")
+        return redirect('employer_dashboard')
+
+    # Update status
+    application.status = 'Shortlisted'
+    application.save()
+
+    seeker_user = application.seeker.user
+
+    # Save an in-app notification
+    Notification.objects.create(
+        recipient=seeker_user,
+        sender_name=request.user.employer_profile.company_name,
+        message=f"Your application for {application.job.job_role} has been shortlisted."
+    )
+
+    # Send email notification
+    try:
+        subject = f"Shortlisted for {application.job.job_role}"
+        message_body = (
+            f"Dear {application.seeker.full_name},\n\n"
+            f"Congratulations! Your application for the position of "
+            f"{application.job.job_role} at {application.job.company_name} has been shortlisted.\n\n"
+            f"We will contact you soon with further details.\n\n"
+            f"Best regards,\n{request.user.employer_profile.company_name}"
+        )
+        email_from = getattr(settings, "EMAIL_HOST_USER", None)
+        if email_from:
+            send_mail(subject, message_body, email_from, [seeker_user.email])
+        messages.success(request, f"{application.seeker.full_name} has been shortlisted and notified.")
+    except Exception:
+        messages.warning(request, f"{application.seeker.full_name} shortlisted, but email could not be sent.")
+
     return redirect('employer_dashboard')
 
 
 @login_required
-def send_notification(request):
-    if request.method == "POST":
-        applicant_id = request.POST.get('applicant_id')
-        message_text = request.POST.get('message')
-        
-        # 1. Fetch Application
-        application = get_object_or_404(Application, id=applicant_id)
-        candidate = application.user
-        
-        # 2. Security Check
-        if application.job.employer != request.user:
-            messages.error(request, "Unauthorized.")
-            return redirect('employer_dashboard')
+def reject_candidate(request, applicant_id):
+    if request.method != "POST":
+        return redirect('employer_dashboard')
 
-        # 3. Save Notification to Database (Optional but recommended)
-        Notification.objects.create(
-            recipient=candidate,
-            sender=request.user,
-            message=message_text,
-            application=application
+    application = get_object_or_404(Application, id=applicant_id)
+
+    # Ensure the logged-in employer owns this job
+    if not request.user.is_employer or application.job.employer.user != request.user:
+        messages.error(request, "Unauthorized access.")
+        return redirect('employer_dashboard')
+
+    # Update status
+    application.status = 'Rejected'
+    application.save()
+
+    seeker_user = application.seeker.user
+
+    # Save an in-app notification
+    Notification.objects.create(
+        recipient=seeker_user,
+        sender_name=request.user.employer_profile.company_name,
+        message=f"Your application for {application.job.job_role} has been rejected."
+    )
+
+    # Send email notification
+    try:
+        subject = f"Update on your application for {application.job.job_role}"
+        message_body = (
+            f"Dear {application.seeker.full_name},\n\n"
+            f"Thank you for applying for the position of {application.job.job_role} "
+            f"at {application.job.company_name}. After careful consideration, "
+            f"we will not be moving forward with your application.\n\n"
+            f"We appreciate your interest and wish you success in your job search.\n\n"
+            f"Best regards,\n{request.user.employer_profile.company_name}"
         )
-
-        # 4. Send Real Email (Optional)
-        try:
-            subject = f"Update on your application for {application.job.title}"
-            email_from = settings.EMAIL_HOST_USER
-            recipient_list = [candidate.email]
-            
-            send_mail(subject, message_text, email_from, recipient_list)
-            messages.success(request, f"Notification sent to {candidate.get_full_name()} successfully!")
-        except Exception as e:
-            messages.warning(request, "Notification saved, but email failed to send.")
+        email_from = getattr(settings, "EMAIL_HOST_USER", None)
+        if email_from:
+            send_mail(subject, message_body, email_from, [seeker_user.email])
+        messages.success(request, f"{application.seeker.full_name} has been rejected and notified.")
+    except Exception:
+        messages.warning(request, f"{application.seeker.full_name} rejected, but email could not be sent.")
 
     return redirect('employer_dashboard')
 @login_required
