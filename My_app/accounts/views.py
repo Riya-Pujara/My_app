@@ -3,8 +3,9 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
 from datetime import datetime, timedelta
-from .models import User, seekerdb,employerdb, Job, Application, Notification
+from .models import User, seekerdb,employerdb, Job, Application, Notification ,JobSeeker
 from django.contrib import messages
+from .forms import ResumeForm
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -18,7 +19,7 @@ def login_view(request):
 
         if user is not None:
             login(request, user)
-            return redirect('homepage')   # changed
+            return redirect('dashboard_redirect')   # changed
         else:
             messages.error(request, "Invalid email or password.")
             return render(request, 'login.html')
@@ -93,7 +94,7 @@ def dashboard_redirect(request):
 def job_seeker_dashboard(request):
     """Dashboard logic for Job Seekers"""
     if not request.user.is_seeker:
-        return redirect('home')
+        return redirect('homepage')
         
     profile = request.user.seeker_profile
     apps = Application.objects.filter(seeker=profile)
@@ -118,7 +119,7 @@ def job_seeker_dashboard(request):
         },
         'recommended_jobs': recommended
     }
-    return render(request, 'seeker_dashboard.html', context)
+    return render(request, 'job_seeker_dashboard.html', context)
 
 @login_required
 def update_resume(request):
@@ -133,9 +134,9 @@ def update_resume(request):
 
 @login_required
 def employer_dashboard(request):
-    """Dashboard logic for Employers"""
+    
     if not request.user.is_employer:
-        return redirect('home')
+        return redirect('homepage')
 
     employer = request.user.employer_profile
     my_jobs = Job.objects.filter(employer=employer)
@@ -154,8 +155,6 @@ def employer_dashboard(request):
         'active_jobs_list': my_jobs
     }
     return render(request, 'employer_dashboard.html', context)
-
-# --- 5. ADMIN VIEWS ---
 
 @user_passes_test(lambda u: u.is_superuser)
 @login_required
@@ -198,3 +197,108 @@ def job_search(request):
     query = request.GET.get('q')
     # logic to filter Job model and return results page
     return render(request, 'index.html') # Placeholder
+
+@login_required
+def shortlist_candidate(request, applicant_id):
+    if request.method == "POST":
+        # 1. Fetch the application
+        application = get_object_or_404(Application, id=applicant_id)
+        
+        # 2. Security Check: Ensure the logged-in user is the owner of the job
+        if application.job.employer != request.user:
+            messages.error(request, "Unauthorized access.")
+            return redirect('employer_dashboard')
+
+        # 3. Update Status
+        application.status = 'shortlisted' # Ensure 'shortlisted' is in your Model choices
+        application.save()
+        
+        messages.success(request, f"{application.user.get_full_name()} has been shortlisted!")
+    
+    return redirect('employer_dashboard')
+
+
+@login_required
+def send_notification(request):
+    if request.method == "POST":
+        applicant_id = request.POST.get('applicant_id')
+        message_text = request.POST.get('message')
+        
+        # 1. Fetch Application
+        application = get_object_or_404(Application, id=applicant_id)
+        candidate = application.user
+        
+        # 2. Security Check
+        if application.job.employer != request.user:
+            messages.error(request, "Unauthorized.")
+            return redirect('employer_dashboard')
+
+        # 3. Save Notification to Database (Optional but recommended)
+        Notification.objects.create(
+            recipient=candidate,
+            sender=request.user,
+            message=message_text,
+            application=application
+        )
+
+        # 4. Send Real Email (Optional)
+        try:
+            subject = f"Update on your application for {application.job.title}"
+            email_from = settings.EMAIL_HOST_USER
+            recipient_list = [candidate.email]
+            
+            send_mail(subject, message_text, email_from, recipient_list)
+            messages.success(request, f"Notification sent to {candidate.get_full_name()} successfully!")
+        except Exception as e:
+            messages.warning(request, "Notification saved, but email failed to send.")
+
+    return redirect('employer_dashboard')
+
+def post_job(request):
+    if not request.user.is_employer:
+        return redirect("homepage")
+
+    employer = request.user.employer_profile
+
+    if request.method == "POST":
+        Job.objects.create(
+            employer=employer,   
+            company_name=request.POST.get("company_name"),
+            location=request.POST.get("location"),
+            contact=request.POST.get("contact"),
+            email=request.POST.get("email"),
+            job_role=request.POST.get("job_role"),
+            experience=request.POST.get("experience"),
+            skills=request.POST.get("skills"),
+        )
+
+        return redirect('employer_dashboard')
+
+    return render(request, "post_job.html")
+
+@login_required
+def manage_resume(request):
+    jobseeker, created = JobSeeker.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        form = ResumeForm(request.POST, request.FILES, instance=jobseeker)
+        if form.is_valid():
+            form.save()
+            return redirect('job_seeker_dashboard')
+    else:
+        form = ResumeForm(instance=jobseeker)
+
+    return render(request, 'manage_resume.html', {'form': form})
+
+@login_required
+def my_profile(request):
+    profile = request.user.seeker_profile
+
+    return render(request, 'my_profile.html', {
+        'profile': profile
+    })
+    
+@login_required
+def view_all_jobs(request):
+    jobs = Job.objects.filter(is_active=True).order_by('-created_at')
+    return render(request, 'view_all_jobs.html', {'jobs': jobs})

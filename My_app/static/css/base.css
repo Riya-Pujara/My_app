@@ -169,6 +169,117 @@ body {
   font-size: 0.9rem;
 }
 
+/* --- NAVIGATION STYLES --- */
+.navbar .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.nav-links,
+.nav-auth {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  gap: 15px;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- DROPDOWN LOGIC --- */
+.dropdown {
+  position: relative;
+  padding-bottom: 10px; /* CRITICAL FIX: Creates a bridge so mouse stays 'hovering' */
+  margin-bottom: -10px; /* Offsets the padding so layout doesn't break */
+}
+
+.dropbtn {
+  color: #00d2ff;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #ffffff;
+  min-width: 220px;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  border-radius: 10px;
+  top: 100%; /* Positions exactly below the parent */
+  left: 0;
+  padding: 10px 0;
+  margin: 0;
+  list-style: none;
+  border: 1px solid #ebebeb;
+}
+
+/* Specific alignment for the Auth (Right side) dropdown */
+.nav-auth .dropdown-content {
+  left: auto;
+  right: 0;
+}
+
+/* Show dropdown on hover of the PARENT (the li or div) */
+.dropdown:hover .dropdown-content {
+  display: block;
+  animation: fadeInSlide 0.2s ease-out;
+}
+
+/* Dropdown Item Styling */
+.dropdown-content li a {
+  color: #333;
+  padding: 12px 20px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  transition: 0.2s;
+}
+
+.dropdown-content li a i {
+  width: 20px;
+  color: #00bcd4;
+}
+
+.dropdown-content li a:hover {
+  background-color: #f4fbfc;
+  color: #00bcd4;
+  padding-left: 25px;
+}
+
+/* Animation for smoothness */
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Button Styles */
+.btn-cyan {
+  background-color: #00bcd4;
+  color: white;
+  padding: 10px 22px;
+  border-radius: 50px;
+  font-weight: 600;
+}
+
+.btn-text {
+  color: #74d4f7;
+  text-decoration: none;
+  font-weight: 500;
+}
 /* Base Responsive */
 @media (max-width: 900px) {
   .footer-content {

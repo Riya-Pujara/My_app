@@ -19,28 +19,28 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('',views.home,name='homepage'),
-    
-    # path('base/',views.base_view,name='base'),
-    
-    path('login/',views.login_view,name='login'),
-    
-    # path('dashboard/', views.dashboard_redirect, name='dashboard_redirect'),
+    path('', views.home, name='homepage'),
 
-    path('logout/',views.logout_view,name='logout'),
-    
-    path('job_search/',views.job_search,name='job_search'),
-    
-    path('update_resume/',views.update_resume,name='update_resume'),
-     
-    path('company_detail/',views.job_search,name='company_detail'),
-    
-    path('registration/',views.registration,name='registration'),
-    
-    path('job_seeker_dashboard/',views.job_seeker_dashboard,name='job_seeker_dashboard'),
-    
-    path('employer_dashboard/',views.employer_dashboard,name='employer_dashboard'),
-    
-    path('admin_dashboard/',views.admin_dashboard,name='admin_dashboard'),
+    path('login/', views.login_view, name='login'),
+
+    path('dashboard/', views.dashboard_redirect, name='dashboard_redirect'),
+
+    path('logout/', views.logout_view, name='logout'),
+
+    path('registration/', views.registration, name='registration'),
+
+    path('job_seeker_dashboard/', views.job_seeker_dashboard, name='job_seeker_dashboard'),
+
+    path('employer_dashboard/', views.employer_dashboard, name='employer_dashboard'),
+
+    path('admin_dashboard/', views.admin_dashboard, name='admin_dashboard'),
+
+    path("post_job/", views.post_job, name="post_job"),
+    path('job_search/', views.job_search, name='job_search'),
+    path('update_resume/', views.update_resume, name='update_resume'),
+    path('manage-resume/', views.manage_resume, name='manage_resume'),
+    path('my-profile/', views.my_profile, name='my_profile'),
+    path('all_jobs/', views.view_all_jobs, name='view_all_jobs'),
     path('admin/', admin.site.urls),
 ]
+ 
