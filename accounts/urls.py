@@ -38,4 +38,5 @@ urlpatterns = [
     path('admin_dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('all_jobs/', views.view_all_jobs, name='view_all_jobs'),
     path('admin/', admin.site.urls),
+    path('suspend_user/<int:user_id>/', views.suspend_user, name='suspend_user'),
 ]
