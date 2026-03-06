@@ -1,0 +1,47 @@
+{% extends 'base.html' %} {% load static %} {% block title %} My
+Profile{%endblock %} {% block extra_css%}
+<link rel="stylesheet" href="{% static 'css/my_profile.css' %}" />
+{%endblock%} {% block content %}
+
+<div class="profile-container">
+  <div class="profile-card">
+    <div class="profile-header">
+      <h2>My Profile</h2>
+    </div>
+
+    <div class="profile-body">
+      <div class="profile-row">
+        <span class="label">Name</span>
+        <span class="value">{{ profile.full_name }}</span>
+      </div>
+
+      <div class="profile-row">
+        <span class="label">Email</span>
+        <span class="value">{{ request.user.email }}</span>
+      </div>
+
+      <div class="profile-row">
+        <span class="label">Experience</span>
+        <span class="value">{{ profile.experience_years }} Years</span>
+      </div>
+
+      <div class="profile-row">
+        <span class="label">Skills</span>
+        <span class="value">{{ profile.skills }}</span>
+      </div>
+
+      <div class="profile-row">
+        <span class="label">Resume</span>
+        <span class="value">
+          {% if profile.resume %}
+          <a href="{{ profile.resume.url }}" target="_blank" class="resume-btn">
+            Download Resume
+          </a>
+          {% else %} No Resume Uploaded {% endif %}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
