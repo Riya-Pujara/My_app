@@ -17,7 +17,11 @@
         <li>
           <a href="{% url 'view_all_jobs' %}"><i class="fas fa-search"></i> Browse Jobs</a>
         </li>
-      
+        <li>
+            <a href="{% url 'my_applications' %}">
+            <i class="fas fa-briefcase"></i> My Applications
+            </a>
+        </li>
         <li>
           <li><a href="{% url 'manage_resume' %}">Resume / CV</a></li>
         </li>
@@ -120,8 +124,9 @@
             </div>
             <div class="job-meta">
               <span class="salary">{{ job.salary_range }}</span>
-        <a href="https://mail.google.com/mail/?view=cm&fs=1&to={{ job.email }}&su=Application for {{ job.job_role }}&body=Hello {{ job.company_name }}, I would like to apply for the {{ job.job_role }} position."
-        target="_blank" class="btn-navy-sm" style="text-decoration: none"> Apply Now</a>            </div>
+        <a href="{% url 'apply_job' job.id %}" class="btn-navy-sm" style="text-decoration:none">
+Apply Now
+</a>        </div>
           </div>
           {% empty %}
           <p>No job recommendations found based on your profile.</p>

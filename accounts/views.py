@@ -192,7 +192,37 @@ def apply_job(request, job_id):
     )
 
     return redirect(gmail_url)
+@login_required
+def apply_job(request, job_id):
+    if not request.user.is_seeker:
+        return redirect('homepage')
 
+    job = get_object_or_404(Job, id=job_id, is_active=True)
+    seeker = request.user.seeker_profile
+
+    # prevent duplicate applications
+    application, created = Application.objects.get_or_create(
+        job=job,
+        seeker=seeker
+    )
+
+    if created:
+        messages.success(request, "Application submitted successfully.")
+    else:
+        messages.info(request, "You already applied for this job.")
+
+    return redirect('job_seeker_dashboard')
+@login_required
+def my_applications(request):
+    if not request.user.is_seeker:
+        return redirect('homepage')
+
+    seeker = request.user.seeker_profile
+    applications = Application.objects.filter(seeker=seeker).order_by('-applied_at')
+
+    return render(request, 'my_applications.html', {
+        'applications': applications
+    })
 # --- 4. EMPLOYER VIEWS ---
 
 @login_required

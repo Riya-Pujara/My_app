@@ -1,0 +1,92 @@
+/* ===== Page Layout ===== */
+
+.applications-wrapper {
+  padding: 40px;
+  background: #f4f7fb;
+  min-height: 100vh;
+}
+
+/* ===== Heading ===== */
+
+.applications-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #0a192f;
+  margin-bottom: 25px;
+}
+
+/* ===== Table Container ===== */
+
+.table-container {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+/* ===== Table Styling ===== */
+
+.app-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.app-table thead {
+  background: #0a192f;
+  color: white;
+}
+
+.app-table th {
+  padding: 14px;
+  font-size: 14px;
+  text-align: left;
+}
+
+.app-table td {
+  padding: 16px 14px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+.app-table tr:hover {
+  background: #f7fbff;
+}
+
+/* ===== Status Badges ===== */
+
+.status {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Pending */
+
+.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+/* Shortlisted */
+
+.status-shortlisted {
+  background: #d4edda;
+  color: #155724;
+}
+
+/* Rejected */
+
+.status-rejected {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* ===== Empty Message ===== */
+
+.empty-msg {
+  text-align: center;
+  padding: 30px;
+  color: #777;
+  font-size: 15px;
+}

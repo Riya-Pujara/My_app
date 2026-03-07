@@ -1,0 +1,54 @@
+{% extends 'base.html' %} {% load static %} {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/my_applications.css' %}" />
+{% endblock %} {% block content %}
+
+<div class="applications-wrapper">
+  <h2 class="applications-title">My Job Applications</h2>
+
+  <div class="table-container">
+    <table class="app-table">
+      <thead>
+        <tr>
+          <th>Job Role</th>
+          <th>Company</th>
+          <th>Date Applied</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for app in applications %}
+
+        <tr>
+          <td>{{ app.job.job_role }}</td>
+          <td>{{ app.job.company_name }}</td>
+          <td>{{ app.applied_at|date:"d M Y" }}</td>
+
+          <td>
+            {% if app.status == "Pending" %}
+            <span class="status status-pending">Pending</span>
+
+            {% elif app.status == "Shortlisted" %}
+            <span class="status status-shortlisted">Shortlisted</span>
+
+            {% else %}
+            <span class="status status-rejected">Rejected</span>
+            {% endif %}
+          </td>
+        </tr>
+
+        {% empty %}
+
+        <tr>
+          <td colspan="4" class="empty-msg">
+            You haven't applied to any jobs yet.
+          </td>
+        </tr>
+
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
