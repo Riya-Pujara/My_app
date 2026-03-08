@@ -417,3 +417,19 @@ def view_all_jobs(request):
     jobs = Job.objects.filter(is_active=True).order_by('-created_at')
     return render(request, 'view_all_jobs.html', {'jobs': jobs})
 
+@login_required
+def delete_job(request, job_id):
+    if not request.user.is_employer:
+        return redirect('homepage')
+
+    job = get_object_or_404(Job, id=job_id)
+
+    # ensure employer owns this job
+    if job.employer.user != request.user:
+        return redirect('employer_dashboard')
+
+    job.delete()   # permanently delete job
+
+    messages.success(request, "Job removed successfully.")
+    return redirect('employer_dashboard')
+

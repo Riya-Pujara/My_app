@@ -147,3 +147,60 @@ body {
   padding: 15px;
   border-bottom: 1px solid #eee;
 }
+/* Action Buttons */
+
+.btn-shortlist {
+  background: #00c853;
+  border: none;
+  padding: 6px 12px;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn-shortlist:hover {
+  background: #00a844;
+}
+
+.btn-reject {
+  background: #ff5252;
+  border: none;
+  padding: 6px 12px;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  margin-left: 5px;
+}
+
+.btn-reject:hover {
+  background: #e53935;
+}
+
+.action-disabled {
+  color: #888;
+  font-size: 13px;
+}
+
+/* Status badge */
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: #eef3ff;
+  font-size: 12px;
+}
+.btn-delete {
+  background: #ff5252;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn-delete:hover {
+  background: #e53935;
+}
