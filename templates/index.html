@@ -1,8 +1,8 @@
-{% extends 'base.html' %} {% load static %} {% block content %}
-<!-- Broad Navy Header with Multi-Color Glow -->
+{% extends 'base.html' %} {% load static %} 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/index.css' %}" />
 {% endblock %}
+{% block content %}
 <header class="hero-header">
   <div class="container hero-content">
     <div class="top-label">#1 Trusted Recruitment Platform</div>
@@ -51,18 +51,25 @@
     </div>
 
     <div class="jobs-grid">
-      {% if latest_jobs %} {% for job in latest_jobs %}
-      <div class="job-card">
-        <h3>{{ job.job_role }}</h3>
-        <p class="company">{{ job.company_name }} • {{ job.location }}</p>
-        <p><strong>Experience:</strong> {{ job.experience }}</p>
-        <p><strong>Skills:</strong> {{ job.skills|truncatewords:15 }}</p>
+  {% if latest_jobs %} 
+  {% for job in latest_jobs|slice:":3" %}
+  <div class="job-card">
+    <h3>{{ job.job_role }}</h3>
+    <p class="company">{{ job.company_name }} • {{ job.location }}</p>
+    <p><strong>Experience:</strong> {{ job.experience }}</p>
+    <p><strong>Skills:</strong> {{ job.skills|truncatewords:15 }}</p>
 
-        <a href="{% url 'apply_job' job.id %}" class="btn-navy-sm">
-          Apply Now
-        </a>
-      </div>
-      {% endfor %} {% else %}
+    <a href="{% url 'apply_job' job.id %}" class="btn-navy-sm">
+      Apply Now
+    </a>
+  </div>
+  {% endfor %} 
+   <div class="view-all-wrapper">
+  <a href="{% url 'view_all_jobs' %}" class="btn-view-all">
+    View All Jobs
+  </a>
+</div> 
+ {% else %}
       <p>No jobs available right now.</p>
       {% endif %}
     </div>

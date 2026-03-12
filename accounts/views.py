@@ -35,12 +35,10 @@ def login_view(request):
     return render(request, "login.html")
 
 def home(request):
-    """Home page showing search and latest jobs."""
     latest_jobs = Job.objects.filter(is_active=True).order_by('-created_at')[:6]
     return render(request, 'index.html', {'latest_jobs': latest_jobs})
 
 def registration(request):
-    """Handles Multi-step registration for both Seekers and Employers"""
     if request.method == 'POST':
         role = request.POST.get('role')
         email = request.POST.get('email')
@@ -48,12 +46,10 @@ def registration(request):
         confirm = request.POST.get('password_confirm')
         full_name = request.POST.get('full_name')
 
-        # Check password match
         if password != confirm:
             messages.error(request, "Passwords do not match.")
             return redirect('registration')
 
-        # Check if user already exists
         if User.objects.filter(username=email).exists():
             messages.error(request, "User already exists.")
             return redirect('registration')
@@ -85,11 +81,8 @@ def registration(request):
 
     return render(request, 'registration.html')
 
-# --- 2. THE ROUTER (Crucial for settings.py LOGIN_REDIRECT_URL) ---
-
 @login_required
 def dashboard_redirect(request):
-    """Redirects user to the correct dashboard based on their role"""
     if request.user.is_superuser:
         return redirect('admin_dashboard')
     elif request.user.is_employer:
@@ -97,26 +90,21 @@ def dashboard_redirect(request):
     else:
         return redirect('job_seeker_dashboard')
 
-# --- 3. SEEKER VIEWS ---
 
 @login_required
 def job_seeker_dashboard(request):
-    """Dashboard logic for Job Seekers"""
     if not request.user.is_seeker:
         return redirect('homepage')
         
     profile = request.user.seeker_profile
     apps = Application.objects.filter(seeker=profile)
     
-    # Calculate stats
     stats = {
         'applied_count': apps.count(),
         'weekly_applied': apps.filter(applied_at__gte=datetime.now()-timedelta(days=7)).count(),
         'interview_count': apps.filter(status='Shortlisted').count(),
-        # 'view_count': profile.profile_views
     }
     
-    # Get recommended jobs (simple logic: matching any skill)
     recommended = Job.objects.filter(is_active=True).order_by('-created_at')[:2]
     
     context = {
@@ -132,7 +120,6 @@ def job_seeker_dashboard(request):
 
 @login_required
 def update_resume(request):
-    """Handles resume upload from dashboard"""
     if request.method == 'POST' and request.FILES.get('resume_file'):
         profile = request.user.seeker_profile
         profile.resume = request.FILES['resume_file']
@@ -142,7 +129,6 @@ def update_resume(request):
 
 @login_required
 def manage_resume(request):
-    """Form-based resume upload/edit page"""
     if not request.user.is_seeker:
         return redirect('homepage')
 
@@ -161,7 +147,6 @@ def manage_resume(request):
 
 @login_required
 def apply_job(request, job_id):
-    """Create an Application record then redirect to email compose."""
     if not request.user.is_seeker:
         return redirect('homepage')
 
@@ -200,7 +185,6 @@ def apply_job(request, job_id):
     job = get_object_or_404(Job, id=job_id, is_active=True)
     seeker = request.user.seeker_profile
 
-    # prevent duplicate applications
     application, created = Application.objects.get_or_create(
         job=job,
         seeker=seeker
@@ -223,7 +207,6 @@ def my_applications(request):
     return render(request, 'my_applications.html', {
         'applications': applications
     })
-# --- 4. EMPLOYER VIEWS ---
 
 @login_required
 def employer_dashboard(request):
@@ -287,17 +270,14 @@ def admin_dashboard(request):
         "profiles": profiles,
         "stats": stats
     })
-# --- 6. MISC ACTIONS ---
 
 def logout_view(request):
     logout(request)
     return redirect('homepage')
 
 def job_search(request):
-    """Search logic for the home page search bar"""
     query = request.GET.get('q')
-    # logic to filter Job model and return results page
-    return render(request, 'index.html') # Placeholder
+    return render(request, 'index.html') 
 
 @login_required
 def shortlist_candidate(request, applicant_id):
@@ -306,25 +286,21 @@ def shortlist_candidate(request, applicant_id):
 
     application = get_object_or_404(Application, id=applicant_id)
 
-    # Ensure the logged-in employer owns this job
     if not request.user.is_employer or application.job.employer.user != request.user:
         messages.error(request, "Unauthorized access.")
         return redirect('employer_dashboard')
 
-    # Update status
     application.status = 'Shortlisted'
     application.save()
 
     seeker_user = application.seeker.user
 
-    # Save an in-app notification
     Notification.objects.create(
         recipient=seeker_user,
         sender_name=request.user.employer_profile.company_name,
         message=f"Your application for {application.job.job_role} has been shortlisted."
     )
 
-    # Send email notification
     try:
         subject = f"Shortlisted for {application.job.job_role}"
         message_body = (
@@ -351,25 +327,21 @@ def reject_candidate(request, applicant_id):
 
     application = get_object_or_404(Application, id=applicant_id)
 
-    # Ensure the logged-in employer owns this job
     if not request.user.is_employer or application.job.employer.user != request.user:
         messages.error(request, "Unauthorized access.")
         return redirect('employer_dashboard')
 
-    # Update status
     application.status = 'Rejected'
     application.save()
 
     seeker_user = application.seeker.user
 
-    # Save an in-app notification
     Notification.objects.create(
         recipient=seeker_user,
         sender_name=request.user.employer_profile.company_name,
         message=f"Your application for {application.job.job_role} has been rejected."
     )
 
-    # Send email notification
     try:
         subject = f"Update on your application for {application.job.job_role}"
         message_body = (
