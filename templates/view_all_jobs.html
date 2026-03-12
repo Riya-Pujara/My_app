@@ -27,8 +27,7 @@
 
       <div class="job-actions">
         <a
-          href="https://mail.google.com/mail/?view=cm&fs=1&to={{ job.email }}&su=Application for {{ job.job_role }}&body=Hello {{ job.company_name }}, I would like to apply for the {{ job.job_role }} position."
-          target="_blank"
+          href="{% url 'apply_job' job.id %}"
           class="btn-navy-sm"
           style="text-decoration: none"
         >

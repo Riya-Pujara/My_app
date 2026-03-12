@@ -200,6 +200,7 @@ def apply_job(request, job_id):
     job = get_object_or_404(Job, id=job_id, is_active=True)
     seeker = request.user.seeker_profile
 
+    # prevent duplicate applications
     application, created = Application.objects.get_or_create(
         job=job,
         seeker=seeker
@@ -210,8 +211,7 @@ def apply_job(request, job_id):
     else:
         messages.info(request, "You already applied for this job.")
 
-    return redirect('job_seeker_dashboard')
-
+    return redirect('my_applications')
 @login_required
 def my_applications(request):
     if not request.user.is_seeker:

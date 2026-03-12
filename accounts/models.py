@@ -63,7 +63,7 @@ class Job(models.Model):
     
     company_name = models.CharField(max_length=200)
     location = models.CharField(max_length=200)
-    contact = models.CharField(max_length=15)
+    contact = models.CharField(max_length=10)
     email = models.EmailField()
     job_role = models.CharField(max_length=200)
     experience = models.CharField(max_length=100)
