@@ -2,24 +2,28 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta,date
 from django.conf import settings
 from django.core.mail import send_mail
 from .models import User, seekerdb, employerdb, Job, Application, Notification
 from django.contrib import messages
 from .forms import ResumeForm
 from urllib.parse import quote
+from django.contrib import messages
 
 @login_required
 def suspend_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
-
     user.is_active = False
     user.save()
-
     return redirect('admin_dashboard')
-    
-from django.contrib import messages
+
+@login_required
+def activate_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    user.is_active = True
+    user.save()
+    return redirect('admin_dashboard')
 
 def login_view(request):
 
@@ -54,12 +58,10 @@ def registration(request):
         confirm = request.POST.get('password_confirm')
         full_name = request.POST.get('full_name')
 
-        # Check password match
         if password != confirm:
             messages.error(request, "Passwords do not match.")
             return redirect('registration')
 
-        # Check if user already exists
         if User.objects.filter(username=email).exists():
             messages.error(request, "User already exists.")
             return redirect('registration')
@@ -91,8 +93,6 @@ def registration(request):
 
     return render(request, 'registration.html')
 
-# --- 2. THE ROUTER (Crucial for settings.py LOGIN_REDIRECT_URL) ---
-
 @login_required
 def dashboard_redirect(request):
     """Redirects user to the correct dashboard based on their role"""
@@ -103,8 +103,6 @@ def dashboard_redirect(request):
     else:
         return redirect('job_seeker_dashboard')
 
-# --- 3. SEEKER VIEWS ---
-
 @login_required
 def job_seeker_dashboard(request):
     """Dashboard logic for Job Seekers"""
@@ -114,15 +112,12 @@ def job_seeker_dashboard(request):
     profile = request.user.seeker_profile
     apps = Application.objects.filter(seeker=profile)
     
-    # Calculate stats
     stats = {
         'applied_count': apps.count(),
         'weekly_applied': apps.filter(applied_at__gte=datetime.now()-timedelta(days=7)).count(),
         'interview_count': apps.filter(status='Shortlisted').count(),
-        # 'view_count': profile.profile_views
     }
     
-    # Get recommended jobs (simple logic: matching any skill)
     recommended = Job.objects.filter(is_active=True).order_by('-created_at')[:2]
     
     context = {
@@ -145,7 +140,6 @@ def update_resume(request):
         profile.save()
     return redirect('job_seeker_dashboard')
 
-
 @login_required
 def manage_resume(request):
     """Form-based resume upload/edit page"""
@@ -163,7 +157,6 @@ def manage_resume(request):
         form = ResumeForm(instance=profile)
 
     return render(request, 'manage_resume.html', {'form': form})
-
 
 @login_required
 def apply_job(request, job_id):
@@ -198,6 +191,7 @@ def apply_job(request, job_id):
     )
 
     return redirect(gmail_url)
+
 @login_required
 def apply_job(request, job_id):
     if not request.user.is_seeker:
@@ -206,7 +200,6 @@ def apply_job(request, job_id):
     job = get_object_or_404(Job, id=job_id, is_active=True)
     seeker = request.user.seeker_profile
 
-    # prevent duplicate applications
     application, created = Application.objects.get_or_create(
         job=job,
         seeker=seeker
@@ -218,6 +211,7 @@ def apply_job(request, job_id):
         messages.info(request, "You already applied for this job.")
 
     return redirect('job_seeker_dashboard')
+
 @login_required
 def my_applications(request):
     if not request.user.is_seeker:
@@ -229,7 +223,6 @@ def my_applications(request):
     return render(request, 'my_applications.html', {
         'applications': applications
     })
-# --- 4. EMPLOYER VIEWS ---
 
 @login_required
 def employer_dashboard(request):
@@ -246,7 +239,7 @@ def employer_dashboard(request):
             'total_applicants': applicants.count(),
             'new_today': applicants.filter(applied_at__date=datetime.today()).count(),
             'shortlisted': applicants.filter(status='Shortlisted').count(),
-        },
+         },
         'pending_count': applicants.filter(status='Pending').count(),
         'shortlisted_count': applicants.filter(status='Shortlisted').count(),
         'applicants': applicants,
@@ -284,16 +277,15 @@ def admin_dashboard(request):
         "total_users": profiles.count(),
         "seekers_count": seekerdb.objects.count(),
         "employers_count": employerdb.objects.count(),
-        "active_jobs": 0,
-        "jobs_today": 0,
-        "pending_verifications": 0
+        "active_jobs": Job.objects.filter(is_active=True).count(),
+        "jobs_today": Job.objects.filter(created_at__date=date.today()).count(),
+        "pending_verifications": employerdb.objects.filter(is_verified=False).count()
     }
 
     return render(request, "admin_dashboard.html", {
         "profiles": profiles,
         "stats": stats
     })
-# --- 6. MISC ACTIONS ---
 
 def logout_view(request):
     logout(request)
@@ -302,8 +294,8 @@ def logout_view(request):
 def job_search(request):
     """Search logic for the home page search bar"""
     query = request.GET.get('q')
-    # logic to filter Job model and return results page
-    return render(request, 'index.html') # Placeholder
+
+    return render(request, 'index.html') 
 
 @login_required
 def shortlist_candidate(request, applicant_id):
@@ -313,19 +305,16 @@ def shortlist_candidate(request, applicant_id):
 
     application = get_object_or_404(Application, id=applicant_id)
 
-    # Security check (employer owns job)
     if not request.user.is_employer or application.job.employer.user != request.user:
         messages.error(request, "Unauthorized access.")
         return redirect('employer_dashboard')
 
-    # Update status
     application.status = "Shortlisted"
     application.save()
 
     messages.success(request, "Candidate shortlisted successfully.")
 
     return redirect('employer_dashboard')
-
 
 @login_required
 def reject_candidate(request, applicant_id):
@@ -339,8 +328,7 @@ def reject_candidate(request, applicant_id):
         messages.error(request, "Unauthorized access.")
         return redirect('employer_dashboard')
 
-    # Update status
-    application.status = "Rejected"
+        application.status = "Rejected"
     application.save()
 
     messages.success(request, "Candidate rejected successfully.")
@@ -383,11 +371,10 @@ def delete_job(request, job_id):
 
     job = get_object_or_404(Job, id=job_id)
 
-    # ensure employer owns this job
     if job.employer.user != request.user:
         return redirect('employer_dashboard')
 
-    job.delete()   # permanently delete job
+    job.delete()   
 
     messages.success(request, "Job removed successfully.")
     return redirect('employer_dashboard')
