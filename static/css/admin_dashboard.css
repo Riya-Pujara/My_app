@@ -503,3 +503,21 @@
     margin-right: 0;
   }
 }
+
+.btn-action.suspend{
+background:#ff4d4d;
+color:white;
+padding:6px 10px;
+border:none;
+border-radius:5px;
+cursor:pointer;
+}
+
+.btn-action.activate{
+background:#28a745;
+color:white;
+padding:6px 10px;
+border:none;
+border-radius:5px;
+cursor:pointer;
+}
