@@ -24,7 +24,6 @@ class seekerdb(models.Model):
     work_type = models.CharField(max_length=20, choices=WORK_TYPES, default='Remote')
     skills = models.TextField(help_text="Enter skills separated by commas")
     
-    # Resume Management
     resume = models.FileField(
         upload_to='resumes/', 
         validators=[FileExtensionValidator(['pdf', 'doc', 'docx'])],
@@ -61,7 +60,7 @@ class Job(models.Model):
         on_delete=models.CASCADE,
         related_name="jobs"
     )
-
+    
     company_name = models.CharField(max_length=200)
     location = models.CharField(max_length=200)
     contact = models.CharField(max_length=15)
