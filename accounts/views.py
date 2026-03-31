@@ -328,13 +328,12 @@ def reject_candidate(request, applicant_id):
         messages.error(request, "Unauthorized access.")
         return redirect('employer_dashboard')
 
-        application.status = "Rejected"
+    application.status = "Rejected"
     application.save()
 
     messages.success(request, "Candidate rejected successfully.")
 
     return redirect('employer_dashboard')
-
 @login_required
 def post_job(request):
     if not request.user.is_employer:
